@@ -24,13 +24,22 @@ const KnexSessionStore = require('connect-session-knex')(session);
 const sessionstore = new KnexSessionStore(/* options here */); // defaults to a sqlite3 database
 var sqliteconfig = {
   dialect: 'sqlite3',
-  connection: { filename: './main.db'}
+  connection: { filename: 'main.db'}
 };
 // TODO knex necessary in this file?
 var knex = require('knex')(sqliteconfig);
 
-
-const upload = multer({ dest: path.join(__dirname, 'uploads') });
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'uploads'))
+  },
+  filename: function (req, file, cb) { console.log(file)
+    // cb(null, file.fieldname + '-' + Date.now())
+	cb(null, file.originalname)
+  }
+})
+// const upload = multer({ dest: path.join(__dirname, 'uploads') });
+const upload = multer({ storage:storage });
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -89,6 +98,8 @@ const sessionopts = {
 	secret: 'the_ink_in_inky',
 	duration: 30 * 60 * 1000,
 	activeDuration: 5 * 60 * 1000,
+	resave: true,
+	saveUninitialized: true,
 	store : sessionstore,
 	autoReconnect: true,
     clear_interval: 3600,
@@ -187,8 +198,8 @@ app.get('/api/paypal', apiController.getPayPal);
 app.get('/api/paypal/success', apiController.getPayPalSuccess);
 app.get('/api/paypal/cancel', apiController.getPayPalCancel);
 app.get('/api/lob', apiController.getLob);
-app.get('/api/upload', apiController.getFileUpload);
-app.post('/api/upload', upload.single('myFile'), apiController.postFileUpload);
+app.get('/api/upload', userController.isloggedin, apiController.getFileUpload);
+app.post('/api/upload', userController.isloggedin,  upload.single("myFile"), apiController.postFileUpload);
 // app.get('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getPinterest);
 // app.post('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.postPinterest);
 app.get('/api/google-maps', apiController.getGoogleMaps);

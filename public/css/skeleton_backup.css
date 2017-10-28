@@ -5,8 +5,6 @@
 * Free to use under the MIT license.
 * http://www.opensource.org/licenses/mit-license.php
 * 12/29/2014
-
-inky version with 250px sidenav; the 550px needs to be increased due to the sidenav.
 */
 
 
@@ -52,8 +50,8 @@ inky version with 250px sidenav; the 550px needs to be increased due to the side
     padding: 0; }
 }
 
-/* For devices larger than 650px */
-@media (min-width: 650px) {
+/* For devices larger than 550px */
+@media (min-width: 550px) {
   .container, hr {
     width: 80%; }
   .column,
@@ -146,7 +144,7 @@ h5 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }
 h6 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
 
 /* Larger than phablet */
-@media (min-width: 650px) {
+@media (min-width: 550px) {
   h1 { font-size: 5.0rem; }
   h2 { font-size: 4.2rem; }
   h3 { font-size: 3.6rem; }
@@ -410,7 +408,7 @@ there.
 @media (min-width: 400px) {}
 
 /* Larger than phablet (also point when grid becomes active) */
-@media (min-width: 650px) {}
+@media (min-width: 550px) {}
 
 /* Larger than tablet */
 @media (min-width: 750px) {}

@@ -1,0 +1,60 @@
+.sidenav
+	.container
+		ul
+			if !user
+				li(class=(title === 'Create Account') ? 'active' : undefined)
+					a(href='/signup') Create Account
+				li(class=(title === 'Login') ? 'active' : undefined)
+					a(href='/login') Login
+			else
+				li(class=(title === 'Account Management') ? 'active' : undefined)
+					// a(href="#")= user.username || user.email || user.id
+					a(href="#") Logged in as 
+						span= user
+					ul(style="font-size:100%;")
+						li
+							a(href='/account') My Account
+						li
+							a(href='/logout') Logout
+			hr
+			li(class=(title === 'Home') ? 'active' : undefined)
+				a(href='/') Home
+			li(class=(title === 'API Examples') ? 'active' : undefined)
+				a(href='/api') API Examples
+			li(class=(title === 'Contact') ? 'active' : undefined)
+				a(href='/contact') Contact
+			li
+				a(href='/status') Status
+
+style.
+	.sidenav {
+		display:none;
+		margin-top:10em;
+		margin-right: 0.5em;
+		border-right: 1px solid #E1E1E1;
+	}
+	
+	@media (min-width: 650px) {
+		.sidenav {
+			display:block !important;
+			width:250px;
+		}
+	}
+
+	@media (min-width: 400px) {
+	}
+
+	.sidenav li {
+		list-style-type:none;
+		padding: 0 16px;
+	}
+	.active {
+		border-radius: 7px;
+		border :1px solid;
+	}
+
+script.
+	$(".hamburger").on("click", function (el) {
+		$(".sidenav").toggle() 
+	});
+	

@@ -12,7 +12,7 @@ const bcrypt = require("bcrypt");
 var knex = require('knex')({
   dialect: 'sqlite3',
   connection: {
-    filename: './main.db'
+    filename: 'main.db'
   }
 });
 
@@ -24,7 +24,7 @@ const c = console.log;
 exports.getlogin = (req, res) => {
 	if (req.session.user) {
 		req.flash("info" , {msg:"User already logged in."});
-		res.redirect(req.session.returnTo || "/");
+		return res.redirect(req.session.returnTo || "/");
 	} else {
 		res.render('account/login', {
 			title: 'Login'
@@ -37,22 +37,23 @@ exports.postlogin =  (req, res, next) => {
 		// next("already logged in");
 		req.flash("info" , {msg:"User already logged in."});
 		c("already logged in : referer: "+ req.header('Referer'));
-		(req.header('Referer')) ? res.redirect(req.header('Referer')) : res.redirect("/");
+		c(req.session);
+		return res.redirect(req.session.returnTo || "/");
 	}
 	else {
 		if (!req.body.username ||  !req.body.password) {
 			req.flash('errors', { msg: 'Username or Password missing' });
-			res.redirect("/login");
+			return res.redirect("/login");
 		}
 		inkyauth.authuser(req.body.username, req.body.password).then( (authresult) => {
 			// todo whose concern is this? maybe make authuser a middleware and move this to authuser?
 			req.session.user = req.body.username;	
 			req.flash("success" , {msg:"Login successfull."});
-			res.redirect(req.session.returnTo || "/");
+			return res.redirect("back");
 			// res.send("newskeleton/main");	 
 		}, (err) => {
 			req.flash("errors" , {msg: err});
-			res.redirect("/login");
+			return res.redirect("/login");
 		}); 
 	}
 }; // route
@@ -63,20 +64,24 @@ exports.getcheckloginclient = (req,res,next) => {
 	
 };
 
-exports.checklogin =(req,res,next) => {	
+exports.isloggedin =(req,res,next) => {	
 	if (req.session.user) next();
-	else next("checklogin failed: not logged in");
+	else {
+		// next("Not logged in. You need to be logged in for this page.");
+		req.flash("errors" , {msg: "Not logged in. You need to be logged in for this page."});
+		return res.redirect("back");
+	}
 }
 
 exports.getlogout = (req,res,next) => {
 	if(req.session.user) {
 		// req.flash("success" , {msg : "Logout successfull."});
 		req.session.destroy();
-		res.redirect("/");		
+		return res.redirect("/");		
 		// setTimeout( () => req.session.destroy() , 500);
 	} else { 
 		req.flash("errors" , {msg : "Couldn't logout because you are not logged in."});
-		res.redirect("/");
+		return res.redirect("/");
 
 	}
 };
@@ -92,11 +97,11 @@ exports.getsignup = (req, res) => {
 exports.postsignup = (req, res, next) => {
 	inkyauth.createuser(req.body.username, req.body.email, req.body.password).then( (authresult) => {
 		req.flash("success" , {msg : "User creation successfull."})
-		res.redirect("/login");	 
+		return res.redirect("/login");	 
 	}, (err) => 
 	{
 		req.flash("errors" , {msg: err});
-		res.redirect("/signup");
+		return res.redirect("/signup");
 	}); // authuser with then
 } // route
 
@@ -113,12 +118,12 @@ exports.getreset = (req, res, next) => {
   }).then( (users) => {
 	  if (!users[0]) {
 		req.flash("errors" , {msg : "Couldn't find any user with this password reset token. Invalid password reset token."});
-		res.redirect("/forgot");
+		return res.redirect("/forgot");
 	  } else {
 		  user = users[0];
 		  if (user.passwordResetExpires < Date.now()) {
 				req.flash("errors" , {msg : "Password reset token has expired. Please request a new password request token."});
-				res.redirect("/forgot");  
+				return res.redirect("/forgot");  
 		  } else {
 			  // main logic
 			  res.render('account/reset', {
@@ -149,7 +154,7 @@ exports.postreset = (req, res, next) => {
 		  var user = users[0];
 		  if (user.passwordResetExpires < Date.now()) {
 			req.flash("errors" , {msg : "Password reset token has expired. Please request a new password request token."});
-			res.redirect("/forgot");  
+			return res.redirect("/forgot");  
 		  } else {
 			  // main logic
 			knex("users").where({passwordResetToken : req.params.token}).update({
@@ -189,7 +194,7 @@ exports.postreset = (req, res, next) => {
 
   resetPassword()
     // .then(sendResetPasswordEmail)
-    // .then(() => { if (!res.finished) res.redirect('/'); })
+    // .then(() => { if (!res.finished) return res.redirect('/'); })
     // .catch(err => next(err));
 };
 
@@ -227,7 +232,7 @@ exports.postforgot =  (req, res, next) => {
 		if (!user[0]) {
 		  c('Account with that email address does not exist.' );
 		  req.flash("errors" , {msg: "No account with that email address was found."})
-		  res.redirect("/forgot");
+		  return res.redirect("/forgot");
 		} else {
 			knex("users").where({email: req.body.email}).update({
 				passwordResetToken : thetoken,
@@ -274,7 +279,7 @@ exports.postforgot =  (req, res, next) => {
     return transporter.sendMail(mailOptions)
       .then(() => {
         req.flash('info', { msg: `An e-mail has been sent to ${email} with further instructions.` });
-		res.redirect("/forgot");
+		return res.redirect("/forgot");
       });
   };
 
@@ -284,13 +289,13 @@ exports.postforgot =  (req, res, next) => {
   }
   
   // sendForgotPasswordEmail(testuser)
-  // .then(() => res.redirect('/forgot'))
+  // .then(() => return res.redirect('/forgot'))
   // .catch(next);
 
   // createRandomToken
     // .then(setRandomToken)
     // .then(sendForgotPasswordEmail)
-    // .then(() => res.redirect('/forgot'))
+    // .then(() => return res.redirect('/forgot'))
     // .catch(next);
 };
 

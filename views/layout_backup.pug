@@ -14,15 +14,13 @@ html
 
 
 	body
-		.wrapper(style="display:flex")
-			a.hamburger
-				h3 &#9776
-			include partials/sidenav
+		include partials/header
 
-			.container
-				include partials/flash
-				block content
-				include partials/footer
+		.container
+			include partials/flash
+			block content
+
+		include partials/footer
 
 		script(src='/js/main.js')
 
@@ -34,22 +32,3 @@ html
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 			ga('create', 'UA-XXXXX-X', 'auto');
 			ga('send', 'pageview');
-
-		style.
-			.hamburger {
-				position:absolute;
-				padding: 0.5em 0.5em 0 0.5em;
-				text-decoration: none;
-				color:black;
-				z-index:5;
-			}
-			.hamburger * {
-				margin: 0;
-				padding: 0;
-			}
-			@media (min-width: 650px) {
-				.hamburger {
-					display:none;
-				}
-			}
-	

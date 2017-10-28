@@ -14,7 +14,7 @@ const schemas = require("./models/models");
 var knex = require('knex')({
   dialect: 'sqlite3',
   connection: {
-    filename: './main.db'
+    filename: 'main.db'
   }
 });
 
